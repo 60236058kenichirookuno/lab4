@@ -1,0 +1,138 @@
+#version 460
+layout (isolines) in;
+uniform mat4 modelview; //投影＊ビュー＊モデル
+uniform mat4 projection;
+uniform int NumSegments;
+uniform int NumStrips;
+uniform float Para_alpha;
+uniform float Para_Rmin;
+uniform float Para_s;
+uniform float Para_eX;
+uniform float Para_eY;
+uniform float Para_Rply;
+uniform float Para_aply;
+uniform int Para_m;
+uniform float Para_Rholoop;
+uniform float Para_Rhohair;
+uniform vec2 Para_loopmax;
+uniform vec2 Para_hairmin;
+uniform vec2 Para_Rhairspan;
+uniform vec2 Para_zhairspan;
+uniform vec2 Para_thairspan;
+uniform vec2 Para_Ri;
+uniform float Para_ti;
+patch in vec4 p_1;
+patch in vec4 p2;
+
+void main()
+{
+  //テッセレーション　uv 座標
+  float u = gl_TessCoord.x;
+  float v = gl_TessCoord.y; //0～1の分割している
+  
+  //パッチの頂点（制御点）
+  vec4 p0 = gl_in[0].gl_Position;
+  vec4 p1 = gl_in[1].gl_Position;
+  
+  // u で評価するcut-mull多項式
+  float b0 = (-1.f * u) + (2.f * u * u) + (-1.f * u * u * u);
+  float b1 = (2.f) + (-5.f * u * u) + (3.f * u * u * u);
+  float b2 = (u) + (4.f * u * u) + (-3.f * u * u * u);
+  float b3 = (-1.f * u * u) + (u * u * u);
+
+  // cut-mull
+  vec4 p = 0.5f*(b0*p_1 + b1*p0 + b2*p1 + b3*p2);
+  // 微分
+  float delta_b0 = (-1.f) + (4.f * u) + (-3.f * u * u);
+  float delta_b1 = (-10.f * u) + (9.f * u * u);
+  float delta_b2 = (1.f) + (8.f * u) + (-9.f * u * u);
+  float delta_b3 = (-2.f * u) + (3.f * u * u);
+  vec4 delta_p = 0.5f*(delta_b0*p_1 + delta_b1*p0 + delta_b2*p1 + delta_b3*p2);
+  vec3 d_xyz_p = {delta_p.x,delta_p.y,delta_p.z};
+
+  // 二階微分
+  float dd_b0 = (4.f) + (-6.f * u);
+  float dd_b1 = (-10.f) + (18.f * u);
+  float dd_b2 = (8.f) + (-18.f * u);
+  float dd_b3 = (-2.f) + (6.f * u);
+  vec4 dd_p = 0.5f*(dd_b0*p_1 + dd_b1*p0 + dd_b2*p1 + dd_b3*p2);
+  vec3 dd_xyz_p = {dd_p.x,dd_p.y,dd_p.z};
+  //繊維形状
+  float pi = 3.1415;
+  float F = v * NumSegments; // 繊維番号
+  vec4 ci = {0.0,0.0,0.0,1.0}; // 最終座標
+  vec4 cyarn = {0.0,0.0,0.0,1.0}; // 糸レベル
+  vec4 cply = {0.0,0.0,0.0,1.0}; // より糸レベル デルタcply_j
+  vec4 cfiber = {0.0,0.0,0.0,1.0}; // 繊維レベル デルタci
+  float theta = 2.0*pi*u/Para_aply;
+  float tply_j = 0.0; //例より糸初期角度
+  if(F > 19 && F < 40){
+    tply_j = 2.0 * pi / 3.0;
+  }
+  if(F > 39){
+    tply_j = 2.0 * pi * 2.0 / 3.0;
+  }
+
+  //糸からより糸 デルタci
+  //Nyarnはgl_positionのy軸 ,Byarnはgl_positionのz軸
+  vec3 Txyz = normalize(d_xyz_p);//外積用
+  vec3 Nxyz = normalize(dd_xyz_p);//外積用
+  vec4 Tyarn = {1.0,0.0,0.0,1.0};//vec4 Tyarn = {Txyz.x,Txyz.y,Txyz.z,1.0};//接線
+  vec4 Nyarn = {0.0,1.0,0.0,1.0};//vec4 Nyarn = {Nxyz.x,Nxyz.y,Nxyz.z,1.0}; //主法線
+  vec3 TNcross = cross(Txyz,Nxyz);//外積
+  vec4 Bxyzw = { TNcross.x,TNcross.y,TNcross.z,1.0 };
+  vec4 Byarn = {0.0,0.0,1.0,1.0};//vec4 Byarn = normalize(Bxyzw);//従法線
+  cply = Para_Rply * (cos(tply_j + theta) * Nyarn + sin(tply_j + theta) * Byarn)/ 2.0;
+ 
+ //繊維のインデックスとテクスチャ座標を対応させる
+  float RI[20][2] = { //R_iを配列で送る方法を考える
+    {0.001,0.564},
+    {0.480,0.350},
+    {-0.174,-0.859},
+    {0.015,-0.091},
+    {0.378,0.532},
+    {-0.166,-0.783},
+    {-0.608,-0.783},
+    {-0.142,-0.462},
+    {-0.392,-0.266},
+    {0.376,0.093},
+    {-0.468,-0.458},
+    {0.599,0.385},
+    {0.361,-0.152},
+    {0.657,-0.492},
+    {0.303,-0.427},
+    {0.153,0.877},
+    {-0.178,-0.817},
+    {-0.732,0.406},
+    {-0.835,0.035},
+    {-0.105,-0.949}
+  };
+  float TI[20] = {0.002,0.940,-2.941,2.979,0.618,-0.246,-2.482,-2.843,-2.167,1.329,-2.345,0.999,1.968,2.213,2.524,0.1729,-2.927,-1.065,-1.529,-3.032}; 
+  float use_Ri[2]  = {0.0,0.0};
+  float use_Ti  = 0.0;
+  float use_Di  = 0.0;
+  for(int i = 0;i < 60;i++){
+    int j = i;
+    if(i >= 20){
+      j = i - 20;
+    }
+    if(i >= 40){
+      j = i - 40;
+    }
+    if(F > float(i)*0.9 && F < float(i)*1.1){
+      use_Ri[0] = RI[j][0];
+      use_Ri[1] = RI[j][1];
+      use_Ti = TI[j];
+      use_Di = sqrt(use_Ri[0] * use_Ri[0] + use_Ri[1] * use_Ri[1]);
+    }
+  }
+  float Para_Rmax = 1.0;
+  //float R_i = sqrt(Para_Ri.x * Para_Ri.x + Para_Ri.y * Para_Ri.y);
+  float R = (use_Di / 2.0) * (Para_Rmax + Para_Rmin + (Para_Rmax - Para_Rmin) * cos(use_Ti + Para_s * theta));
+  vec4 Nply = normalize(cply);
+  vec4 Bply = {0.0,-Nply.z,Nply.y,1.0};
+  cfiber = R * (cos(use_Ti + theta) * Nply * Para_eX + sin(use_Ti + theta) * Bply * Para_eY);
+  vec4 new_p = p + cply + cfiber;
+  gl_Position = projection * modelview * vec4(new_p.x,new_p.y,new_p.z,new_p.w);
+  
+}

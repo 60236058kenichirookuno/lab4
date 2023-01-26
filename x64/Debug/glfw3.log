@@ -1,0 +1,18 @@
+﻿  main.cpp
+C:\okuno\Documents\t\glfw3sample-master\main.cpp(503,34): warning C4305: '引数': 'double' から 'GLfloat' へ切り詰めます。
+C:\okuno\Documents\t\glfw3sample-master\main.cpp(504,31): warning C4305: '引数': 'double' から 'GLfloat' へ切り詰めます。
+C:\okuno\Documents\t\glfw3sample-master\main.cpp(505,27): warning C4305: '引数': 'double' から 'GLfloat' へ切り詰めます。
+C:\okuno\Documents\t\glfw3sample-master\main.cpp(506,30): warning C4305: '引数': 'double' から 'GLfloat' へ切り詰めます。
+C:\okuno\Documents\t\glfw3sample-master\main.cpp(507,30): warning C4305: '引数': 'double' から 'GLfloat' へ切り詰めます。
+C:\okuno\Documents\t\glfw3sample-master\main.cpp(508,32): warning C4305: '引数': 'double' から 'GLfloat' へ切り詰めます。
+C:\okuno\Documents\t\glfw3sample-master\main.cpp(509,32): warning C4305: '引数': 'double' から 'GLfloat' へ切り詰めます。
+C:\okuno\Documents\t\glfw3sample-master\main.cpp(511,35): warning C4305: '引数': 'double' から 'GLfloat' へ切り詰めます。
+C:\okuno\Documents\t\glfw3sample-master\main.cpp(512,35): warning C4305: '引数': 'double' から 'GLfloat' へ切り詰めます。
+C:\okuno\Documents\t\glfw3sample-master\main.cpp(513,41): warning C4305: '引数': 'double' から 'GLfloat' へ切り詰めます。
+C:\okuno\Documents\t\glfw3sample-master\main.cpp(514,41): warning C4305: '引数': 'double' から 'GLfloat' へ切り詰めます。
+C:\okuno\Documents\t\glfw3sample-master\main.cpp(515,43): warning C4305: '引数': 'double' から 'GLfloat' へ切り詰めます。
+C:\okuno\Documents\t\glfw3sample-master\main.cpp(516,44): warning C4305: '引数': 'double' から 'GLfloat' へ切り詰めます。
+C:\okuno\Documents\t\glfw3sample-master\main.cpp(517,45): warning C4305: '引数': 'double' から 'GLfloat' へ切り詰めます。
+C:\okuno\Documents\t\glfw3sample-master\main.cpp(518,38): warning C4305: '引数': 'double' から 'GLfloat' へ切り詰めます。
+C:\okuno\Documents\t\glfw3sample-master\main.cpp(519,31): warning C4305: '引数': 'double' から 'GLfloat' へ切り詰めます。
+  glfw3.vcxproj -> C:\okuno\Documents\t\glfw3sample-master\x64\Debug\glfw3.exe
